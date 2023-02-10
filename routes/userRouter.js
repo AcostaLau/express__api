@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
   res.status(200).json(users)
 })
 
-router.get('/:id', validatorHandler(getUserSchema(), 'params'),
+router.get('/:id', validatorHandler(getUserSchema, 'params'),
 async (req, res, next)=> {
   try{
     const { id } =req.params;
@@ -26,7 +26,7 @@ async (req, res, next)=> {
   }
 })
 // post
-router.post('/', validatorHandler(createUserSchemam(), 'body'), async (req, res, next) => {
+router.post('/', validatorHandler(createUserSchemam, 'body'), async (req, res, next) => {
   try{
     const body = req.body;
     const newUser = await service.create(body)
@@ -37,7 +37,7 @@ router.post('/', validatorHandler(createUserSchemam(), 'body'), async (req, res,
 
 })
 
-router.patch('/:id', validatorHandler(updateUserSchema(), 'body'), validatorHandler(getUserSchema(), 'params'), async (req, res, next) => {
+router.patch('/:id', validatorHandler(updateUserSchema, 'body'), validatorHandler(getUserSchema, 'params'), async (req, res, next) => {
   try{
     const { id } = req.params;
     const body = req.body;
