@@ -1,4 +1,6 @@
 const express = require('express')
+const {createUserSchemam, getUserSchema, updateUserSchema} = require('../schemas/userSchema')
+const validatorHandler = require('../middlewares/validatorHandler')
 const userService = require('../services/userService')
 
 
@@ -6,36 +8,60 @@ const userService = require('../services/userService')
 const router = express.Router()
 const service = new userService()
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
 
-  const users = service.find()
+  const users = await service.find()
 
   res.status(200).json(users)
 })
 
-router.get('/:id', (req, res)=> {
-  const {id} = req.params()
-  const user = service.findOne(id)
-  res.status(200).json(user)
+router.get('/:id', validatorHandler(getUserSchema(), 'params'),
+async (req, res, next)=> {
+  try{
+    const { id } =req.params;
+    const user = await service.findOne(id)
+    res.json(user)
+  }catch(e){
+    next(e)
+  }
 })
 // post
-router.post('/', (req, res) => {
-  const body = req.body;
-  const newUser = service.create(body)
-  res.status(201).json(newUser)
-})
-
-router.patch('/:id', (req, res) => {
-    const {id} = req.params;
+router.post('/', validatorHandler(createUserSchemam(), 'body'), async (req, res, next) => {
+  try{
     const body = req.body;
-    const update = service.update(id, body)
-    res.json(update)
+    const newUser = await service.create(body)
+    res.status(201).json(newUser)
+  }catch(e){
+    next(e)
+  }
+
 })
 
-router.delete('/:id', (res, req) => {
+router.patch('/:id', validatorHandler(updateUserSchema(), 'body'), validatorHandler(getUserSchema(), 'params'), async (req, res, next) => {
+  try{
     const { id } = req.params;
-    const del = service.delete(id)
+    const body = req.body;
+    const update = await service.update(id, body)
+    res.json(update)
+  }catch(error){
+    next(error)
+  }
+
+
+})
+
+router.delete('/:id', async (res, req) => {
+
+  try{
+    const { id } = req.params;
+    const del = await service.delete(id)
     res.json(del)
+  }catch(error){
+    res.status(404).json({
+      message: error.message
+    })
+  }
+
 })
 
 
